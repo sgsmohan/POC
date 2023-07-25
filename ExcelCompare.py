@@ -29,37 +29,36 @@ def compare_xlsx_files(file1_path, file2_path, output_path=None):
             sheet1 = wb1[sheet_name] if sheet_name in sheet_names1 else None
             sheet2 = wb2[sheet_name] if sheet_name in sheet_names2 else None
 
-            # Create new sheets in the output workbook
-            output_sheet1 = output_wb[sheet_name]
-            output_sheet2 = output_wb.create_sheet(title=f"{sheet_name}_missing_in_file1")
+            # Create a dictionary to store data from both sheets
+            data_dict = {}
 
             # Get data from both sheets
             if sheet1:
                 data1 = sheet1.iter_rows(values_only=True)
+                data_dict["file1"] = set(data1)
             else:
-                data1 = []
+                data_dict["file1"] = set()
 
             if sheet2:
                 data2 = sheet2.iter_rows(values_only=True)
+                data_dict["file2"] = set(data2)
             else:
-                data2 = []
+                data_dict["file2"] = set()
 
             # Find the rows present in file1 but missing in file2
-            missing_in_file2 = []
-            for row in data1:
-                if row not in data2:
-                    missing_in_file2.append(row)
+            missing_in_file2 = data_dict["file1"] - data_dict["file2"]
 
             # Find the rows present in file2 but missing in file1
-            missing_in_file1 = []
-            for row in data2:
-                if row not in data1:
-                    missing_in_file1.append(row)
+            missing_in_file1 = data_dict["file2"] - data_dict["file1"]
 
             # Write the differences to the output sheets
+            output_sheet1 = output_wb[sheet_name]
+            output_sheet1.append(["Data missing in file2 from file1:"])
             for row in missing_in_file2:
                 output_sheet1.append(row)
             
+            output_sheet2 = output_wb.create_sheet(title=f"{sheet_name}_missing_in_file1")
+            output_sheet2.append(["Data missing in file1 from file2:"])
             for row in missing_in_file1:
                 output_sheet2.append(row)
 
