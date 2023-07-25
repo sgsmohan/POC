@@ -34,14 +34,18 @@ def compare_xlsx_files(file1_path, file2_path, output_path=None):
             output_sheet.append(["Data", "Source"])
 
             # Get data from both sheets
-            if sheet1:
+            if sheet1 and sheet2:
                 data1 = sheet1.iter_rows(values_only=True)
-                for row in data1:
+                data2 = sheet2.iter_rows(values_only=True)
+
+                # Find the rows present in file1 but missing in file2
+                missing_in_file2 = [row for row in data1 if row not in data2]
+                for row in missing_in_file2:
                     output_sheet.append([cell_value for cell_value in row] + ["file1"])
 
-            if sheet2:
-                data2 = sheet2.iter_rows(values_only=True)
-                for row in data2:
+                # Find the rows present in file2 but missing in file1
+                missing_in_file1 = [row for row in data2 if row not in data1]
+                for row in missing_in_file1:
                     output_sheet.append([cell_value for cell_value in row] + ["file2"])
 
         # Save the output workbook
