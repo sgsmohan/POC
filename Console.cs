@@ -3,39 +3,36 @@ using System.Linq;
 using System.Threading.Tasks;
 using SlackNet;
 using SlackNet.Events;
+using SlackNet.SocketMode;
 using SlackNet.WebApi;
 
 class Program
 {
     static async Task Main()
     {
-        var slackApi = new SlackApiClient("xoxb-your-bot-token"); // Replace with your bot token
-        var eventHandler = new SlackEventHandler(slackApi);
-        
-        var slackReceiver = new SlackEndpoint(eventHandler);
-        await slackReceiver.ListenAsync(port: 3000); // Run server on port 3000
-    }
-}
+        string botToken = "xoxb-your-bot-token"; // Replace with your bot token
+        string appToken = "xapp-your-app-token"; // Replace with your App-Level Token (Socket Mode enabled)
 
-public class SlackEventHandler : IEventHandler<MessageEvent>
-{
-    private readonly ISlackApiClient _slackApi;
-    private readonly string _botUserId;
+        var slackServices = new SlackServiceBuilder()
+            .UseApiToken(botToken)
+            .UseSocketMode(appToken);
 
-    public SlackEventHandler(ISlackApiClient slackApi)
-    {
-        _slackApi = slackApi;
-        _botUserId = slackApi.Auth.Test().Result.UserId; // Get bot's user ID
-    }
+        using var slack = slackServices.GetApiClient();
+        var botUserId = (await slack.Auth.Test()).UserId; // Get Bot's User ID
 
-    public async Task Handle(MessageEvent slackEvent)
-    {
-        // Check if the bot is mentioned and message contains "hi" or "hello"
-        if (slackEvent.Text.Contains($"<@{_botUserId}>") &&
-            (slackEvent.Text.Contains("hi", StringComparison.OrdinalIgnoreCase) ||
-             slackEvent.Text.Contains("hello", StringComparison.OrdinalIgnoreCase)))
+        using var socketModeClient = slackServices.GetSocketModeClient();
+        socketModeClient.OnEvent<MessageEvent>(async (msg) =>
         {
-            await _slackApi.Chat.PostMessage(slackEvent.Channel, "Hello! 😊");
-        }
+            // Check if bot is mentioned and message contains "hi" or "hello"
+            if (msg.Text.Contains($"<@{botUserId}>") &&
+                (msg.Text.Contains("hi", StringComparison.OrdinalIgnoreCase) ||
+                 msg.Text.Contains("hello", StringComparison.OrdinalIgnoreCase)))
+            {
+                await slack.Chat.PostMessage(msg.Channel, "Hello! 😊");
+            }
+        });
+
+        Console.WriteLine("Bot is listening... Press Ctrl+C to exit.");
+        await socketModeClient.Connect();
     }
 }
