@@ -25,9 +25,9 @@ class Program
             {
                 Fields = new List<TextObject>
                 {
-                    new MarkdownText("*Name*"),
-                    new MarkdownText("*Age*"),
-                    new MarkdownText("*Role*")
+                    TextObject.Markdown("*Name*"),
+                    TextObject.Markdown("*Age*"),
+                    TextObject.Markdown("*Role*")
                 }
             },
             new DividerBlock()
@@ -40,9 +40,9 @@ class Program
             {
                 Fields = new List<TextObject>
                 {
-                    new MarkdownText(row.Name),
-                    new MarkdownText(row.Age.ToString()),
-                    new MarkdownText(row.Role)
+                    TextObject.Markdown(row.Name),
+                    TextObject.Markdown(row.Age.ToString()),
+                    TextObject.Markdown(row.Role)
                 }
             });
         }
