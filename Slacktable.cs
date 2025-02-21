@@ -1,4 +1,5 @@
 using SlackNet;
+using SlackNet.Blocks;
 using SlackNet.WebApi;
 using System;
 using System.Collections.Generic;
@@ -25,9 +26,9 @@ class Program
             {
                 Fields = new List<TextObject>
                 {
-                    TextObject.Markdown("*Name*"),
-                    TextObject.Markdown("*Age*"),
-                    TextObject.Markdown("*Role*")
+                    new TextObject { Type = "mrkdwn", Text = "*Name*" },
+                    new TextObject { Type = "mrkdwn", Text = "*Age*" },
+                    new TextObject { Type = "mrkdwn", Text = "*Role*" }
                 }
             },
             new DividerBlock()
@@ -40,9 +41,9 @@ class Program
             {
                 Fields = new List<TextObject>
                 {
-                    TextObject.Markdown(row.Name),
-                    TextObject.Markdown(row.Age.ToString()),
-                    TextObject.Markdown(row.Role)
+                    new TextObject { Type = "mrkdwn", Text = row.Name },
+                    new TextObject { Type = "mrkdwn", Text = row.Age.ToString() },
+                    new TextObject { Type = "mrkdwn", Text = row.Role }
                 }
             });
         }
